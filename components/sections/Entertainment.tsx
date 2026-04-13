@@ -2,7 +2,17 @@
 
 import { useRef, useState } from 'react'
 
-const attractions = [
+interface Attraction {
+  name: string
+  desc: string
+  longDesc: string
+  image: string
+  stats: { [key: string]: string | number }
+  icon: string
+  color: string
+}
+
+const attractions: Attraction[] = [
   {
     name: 'Dubai Aquarium',
     desc: '10M+ liters • 140+ species',
@@ -70,7 +80,6 @@ export default function Entertainment() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         
-        {/* Header */}
         <div className="text-center mb-10 sm:mb-12 md:mb-16">
           <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400">
             Beyond Shopping
@@ -83,7 +92,6 @@ export default function Entertainment() {
           </p>
         </div>
 
-        {/* Horizontal Scroll Container */}
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto overflow-y-hidden pb-6"
@@ -136,7 +144,7 @@ export default function Entertainment() {
                       {Object.entries(attraction.stats).map(([key, value]) => (
                         <div key={key} className="text-center">
                           <div className="text-yellow-400 text-sm sm:text-base font-bold">
-                            {value}
+                            {String(value)}
                           </div>
                           <div className="text-gray-400 text-[10px] sm:text-xs uppercase">
                             {key}
