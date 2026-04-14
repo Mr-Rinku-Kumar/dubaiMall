@@ -26,11 +26,12 @@ export default function CustomCursor() {
     return () => window.removeEventListener('mousemove', moveCursor)
   }, [cursorX, cursorY, isVisible])
 
+  // Don't render on server or if not visible
   if (!mounted || !isVisible) return null
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[100] mix-blend-difference"
+      className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[100] mix-blend-difference hidden lg:block"
       style={{
         x: cursorXSpring,
         y: cursorYSpring,

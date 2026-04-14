@@ -108,7 +108,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight"
+            className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-7xl font-bold tracking-tight"
           >
             <span className="block">The World's Most</span>
             <span className="block mt-2 sm:mt-3 md:mt-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">
