@@ -5,11 +5,21 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 80px;
+    scroll-padding-top: 70px; /* Mobile friendly */
   }
   
   body {
     @apply bg-black text-white overflow-x-hidden;
+    font-size: 16px; /* Base font size for better mobile readability */
+  }
+  
+  /* Better touch targets for mobile */
+  button, 
+  a,
+  [role="button"] {
+    @apply touch-manipulation;
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -27,17 +37,21 @@
     scrollbar-width: none;
   }
   
+  /* Responsive cursor - hide on mobile */
   .custom-cursor {
     cursor: none;
   }
   
+  /* Glass morphism - responsive */
   .glass {
     background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.3s ease;
   }
@@ -48,8 +62,23 @@
     transform: translateY(-5px);
   }
   
+  /* Responsive glass effect for mobile */
+  @media (max-width: 768px) {
+    .glass-card:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
   .snap-section {
     scroll-snap-align: start;
+  }
+  
+  /* Responsive snap scrolling */
+  @media (max-width: 768px) {
+    .snap-section {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
   }
   
   .gradient-text {
@@ -65,21 +94,214 @@
     background-clip: text;
     color: transparent;
   }
+  
+  /* Responsive gradient sizes */
+  @media (max-width: 640px) {
+    .gradient-text, .gradient-gold {
+      background-size: 100% 100%;
+    }
+  }
+  
+  /* Loading shimmer effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Hide scrollbar for horizontal scroll */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Responsive padding utilities */
+  .section-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .section-padding {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .section-padding {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
+  
+  /* Better text contrast on mobile */
+  @media (max-width: 640px) {
+    .text-shadow-sm {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+  }
 }
 
+/* Responsive Scrollbar - Thinner on mobile */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 4px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 6px;
+  }
 }
 
 ::-webkit-scrollbar-track {
   background: #111;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #333;
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Horizontal scrollbar for entertainment section */
+::-webkit-scrollbar:horizontal {
+  height: 4px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar:horizontal {
+    height: 6px;
+  }
+}
+
+::-webkit-scrollbar-track:horizontal {
+  background: #1a1a1a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  background: #444;
+  border-radius: 10px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Reduce animations on mobile for better performance */
+  .glass-card {
+    transition: all 0.2s ease;
+  }
+  
+  /* Better touch feedback */
+  button:active,
+  a:active {
+    transform: scale(0.98);
+    transition: transform 0.05s;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-card {
+    transition: all 0.25s ease;
+  }
+}
+
+/* Prevent zoom on input focus for mobile */
+@media (max-width: 640px) {
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+button, 
+a,
+.glass-card,
+[role="button"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #FFD700;
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Container queries for better responsiveness */
+@container (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 641px) and (max-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 1025px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Loading states */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    #1a1a1a 25%,
+    #2a2a2a 50%,
+    #1a1a1a 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
