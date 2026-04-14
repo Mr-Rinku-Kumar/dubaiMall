@@ -64,12 +64,11 @@ export default function Events() {
   return (
     <section id="events" className="min-h-screen py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-zinc-950 to-black snap-section">
       <div className="max-w-7xl mx-auto">
-        
+
         <div ref={ref as any}>
           {/* Header */}
-          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400">
               Event Capabilities
             </span>
@@ -86,9 +85,8 @@ export default function Events() {
           </div>
 
           {/* Event Stats Row */}
-          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             {eventStats.map((stat, idx) => (
               <div
                 key={stat.label}
@@ -105,9 +103,8 @@ export default function Events() {
           </div>
 
           {/* Video Section */}
-          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-10 sm:mb-12 aspect-video transition-all duration-700 delay-200 ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}>
+          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-10 sm:mb-12 aspect-video transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}>
             {!videoError ? (
               <video
                 autoPlay
@@ -118,7 +115,7 @@ export default function Events() {
                 className="w-full h-full object-cover"
                 poster="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80"
               >
-                <source src="/videos/events.mp4" type="video/mp4" />
+                <source src="/videos/dubai5.mp4" type="video/mp4" />
               </video>
             ) : (
               <img
@@ -137,9 +134,8 @@ export default function Events() {
           </div>
 
           {/* Event Types Grid - 6 items */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             {eventTypes.map((type, i) => (
               <div
                 key={type.name}
@@ -160,9 +156,8 @@ export default function Events() {
           </div>
 
           {/* Venue Highlights */}
-          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-400 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-semibold">Featured Venues</h3>
               <Link href="/events">
@@ -197,9 +192,8 @@ export default function Events() {
           </div>
 
           {/* Past Events Highlights */}
-          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-500 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             <div className="text-center mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-semibold">Past Successes</h3>
               <p className="text-xs sm:text-sm text-gray-400 mt-1">Join brands that made history</p>
@@ -217,10 +211,28 @@ export default function Events() {
             </div>
           </div>
 
+          {/* Venue Modules - New */}
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-center mb-6">Our Venues</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { name: 'Performing Arts Center', capacity: '2,500 seats', icon: '🎭', features: 'Acoustic design, Backstage facilities' },
+                { name: 'Exposition Center', capacity: '10,000+ sqm', icon: '🏛️', features: 'Modular halls, Loading docks' },
+                { name: 'Convention Hall', capacity: '3,000 seats', icon: '📢', features: 'AV equipment, Translation booths' }
+              ].map((venue, i) => (
+                <div key={venue.name} className="glass-card rounded-xl p-4 text-center hover:scale-105 transition">
+                  <div className="text-3xl mb-2">{venue.icon}</div>
+                  <h4 className="font-semibold">{venue.name}</h4>
+                  <p className="text-xs text-gray-400 mt-1">Capacity: {venue.capacity}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{venue.features}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* CTA Section */}
-          <div className={`text-center transition-all duration-700 delay-600 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`text-center transition-all duration-700 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             <Link href="/events">
               <button className="group relative overflow-hidden rounded-full px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/20">
                 <span className="relative z-10 flex items-center gap-2">

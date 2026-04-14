@@ -216,7 +216,7 @@ export default function Dining() {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     poster="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80"
                   >
-                    <source src="/videos/dining.mp4" type="video/mp4" />
+                    <source src="/videos/dubai6.mp4" type="video/mp4" />
                   </video>
                 ) : (
                   <img
