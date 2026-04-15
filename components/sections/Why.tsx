@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { 
   HiOutlineLocationMarker, 
   HiOutlineUsers, 
@@ -45,11 +44,12 @@ function useIntersectionObserver(options = { threshold: 0.2, triggerOnce: true }
   return { ref, isVisible }
 }
 
-// Animated Counter Component with React Icons
+// Animated Counter Component - Optimized
 function AnimatedCounter({ target, suffix = '', prefix = '', icon: Icon, iconColor = 'text-yellow-400' }: 
   { target: number; suffix?: string; prefix?: string; icon?: any; iconColor?: string }) {
   const [count, setCount] = useState(0)
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.5, triggerOnce: true })
+  const intervalRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
     if (isVisible) {
@@ -57,17 +57,19 @@ function AnimatedCounter({ target, suffix = '', prefix = '', icon: Icon, iconCol
       const duration = 1500
       const increment = target / (duration / 16)
       
-      const timer = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         start += increment
         if (start >= target) {
           setCount(target)
-          clearInterval(timer)
+          if (intervalRef.current) clearInterval(intervalRef.current)
         } else {
           setCount(Math.floor(start))
         }
       }, 16)
       
-      return () => clearInterval(timer)
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+      }
     }
   }, [isVisible, target])
 
@@ -153,15 +155,25 @@ const insights = [
 
 export default function Why() {
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2, triggerOnce: true })
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  // Trigger animations only once
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
 
   return (
     <section id="why" className="min-h-screen py-16 sm:py-20 md:py-24 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-black to-zinc-950 snap-section">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header Section */}
+        {/* Header Section - No framer-motion */}
         <div ref={ref as any}>
           <div className={`text-center mb-12 sm:mb-16 md:mb-20 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-4">
               Why Choose Dubai Mall
@@ -180,15 +192,15 @@ export default function Why() {
             </p>
           </div>
 
-          {/* Stats Grid - Responsive with Icons */}
+          {/* Stats Grid - Removed framer-motion, using CSS transitions */}
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20">
             {stats.map((stat, index) => (
-              <motion.div
+              <div
                 key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center hover:scale-105 hover:shadow-xl transition-all duration-300"
+                className={`glass-card rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center hover:scale-105 hover:shadow-xl transition-all duration-300 ${
+                  shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <AnimatedCounter 
                   target={stat.value} 
@@ -205,21 +217,21 @@ export default function Why() {
                     {stat.note}
                   </div>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          {/* Location Features - Responsive Grid with Icons */}
+          {/* Location Features - Removed framer-motion */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-12 sm:mb-16 md:mb-20">
             {locationFeatures.map((feature, index) => {
               const Icon = feature.icon
               return (
-                <motion.div
+                <div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                  className="glass rounded-xl sm:rounded-2xl p-5 sm:p-6 text-center sm:text-left hover:scale-102 hover:shadow-lg transition-all duration-300 group"
+                  className={`glass rounded-xl sm:rounded-2xl p-5 sm:p-6 text-center sm:text-left hover:scale-102 hover:shadow-lg transition-all duration-300 group ${
+                    shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${300 + index * 100}ms` }}
                 >
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
                     <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
@@ -237,22 +249,22 @@ export default function Why() {
                       </p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )
             })}
           </div>
 
-          {/* Additional Insights Bar */}
+          {/* Additional Insights Bar - Removed framer-motion */}
           <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
             {insights.map((insight, index) => {
               const Icon = insight.icon
               return (
-                <motion.div
+                <div
                   key={insight.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
-                  className="glass-card rounded-xl p-3 sm:p-4 text-center hover:scale-102 transition-all duration-300"
+                  className={`glass-card rounded-xl p-3 sm:p-4 text-center hover:scale-102 transition-all duration-300 ${
+                    shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${600 + index * 100}ms` }}
                 >
                   <Icon className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${insight.color}`} />
                   <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400">
@@ -264,7 +276,7 @@ export default function Why() {
                   <div className="text-gray-600 text-[10px] sm:text-xs mt-1">
                     {insight.trend}
                   </div>
-                </motion.div>
+                </div>
               )
             })}
           </div>

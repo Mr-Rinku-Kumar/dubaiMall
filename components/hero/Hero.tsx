@@ -1,26 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useRef } from 'react'
 import { 
   HiOutlineLocationMarker, 
   HiOutlineUsers, 
   HiOutlineStar, 
   HiOutlineArrowRight,
 } from 'react-icons/hi'
-
-import {HiOutlineTrophy} from 'react-icons/hi2'
+import { HiOutlineTrophy } from 'react-icons/hi2'
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false)
-  const [showVideo, setShowVideo] = useState(false)
-  const [videoLoaded, setVideoLoaded] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
-    // Video load hone mein time lagta hai, isliye delay
-    const timer = setTimeout(() => setShowVideo(true), 300)
-    return () => clearTimeout(timer)
   }, [])
 
   const scrollToNext = () => {
@@ -40,50 +34,25 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden snap-section">
       
-      {/* Background Image - Mobile first, loads instantly */}
-      <div className="absolute inset-0 bg-black">
-        {/* Mobile optimized image */}
-        <picture>
-          <source 
-            srcSet="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=640&q=75" 
-            media="(max-width: 640px)" 
-          />
-          <source 
-            srcSet="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1024&q=80" 
-            media="(max-width: 1024px)" 
-          />
-          <img
-            src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920&q=85"
-            alt="Dubai Mall"
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-          />
-        </picture>
+      {/* Video Background Only - No image fallback to save bandwidth */}
+      <div className="absolute inset-0">
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"  // Changed from auto to metadata - faster load
+          className="absolute inset-0 w-full h-full object-cover"
+          poster="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920&q=80"
+        >
+          <source src="/videos/herosection1.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black/60 sm:bg-black/50" />
       </div>
 
-      {/* Video - Loads after image */}
-      {showVideo && (
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            onLoadedData={() => setVideoLoaded(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-              videoLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <source src="/videos/hero2.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-black/60 sm:bg-black/50" />
-        </div>
-      )}
-
       {/* Gradient Overlay - Better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 z-5" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
 
       {/* Content Container - Fully Responsive */}
       <div className="relative h-full min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8 lg:px-12 z-10">
@@ -92,29 +61,18 @@ export default function Hero() {
         <div className={`max-w-7xl mx-auto transition-all duration-700 delay-200 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          {/* Welcome Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <span className="inline-block text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.3em] text-gray-300 uppercase mb-3 sm:mb-4 md:mb-6 px-3 py-1 rounded-full bg-white/10 backdrop-blur">
-              Welcome to
-            </span>
-          </motion.div>
+          {/* Welcome Badge - Removed framer-motion */}
+          <span className="inline-block text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.3em] text-gray-300 uppercase mb-3 sm:mb-4 md:mb-6 px-3 py-1 rounded-full bg-white/10 backdrop-blur">
+            Welcome to
+          </span>
           
-          {/* Main Heading - Responsive font sizes */}
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-7xl font-bold tracking-tight"
-          >
+          {/* Main Heading - Removed framer-motion */}
+          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-7xl font-bold tracking-tight">
             <span className="block">The World's Most</span>
             <span className="block mt-2 sm:mt-3 md:mt-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">
               Visited Destination
             </span>
-          </motion.h1>
+          </h1>
         </div>
 
         {/* Stats & CTA Section */}
@@ -124,27 +82,25 @@ export default function Hero() {
           
           {/* Stats Row - Responsive flex wrap */}
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 px-4">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
-                className="glass px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full text-xs sm:text-sm md:text-base transition-all duration-300 hover:scale-105 hover:bg-white/15 cursor-default flex items-center gap-1.5 sm:gap-2"
-              >
-                <stat.icon className={`${stat.color} text-xs sm:text-sm md:text-base`} />
-                <span className="text-gray-200 text-[11px] xs:text-xs sm:text-sm md:text-base whitespace-nowrap">
-                  {stat.label}
-                </span>
-              </motion.div>
-            ))}
+            {stats.map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <div
+                  key={stat.label}
+                  className="glass px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full text-xs sm:text-sm md:text-base transition-all duration-300 hover:scale-105 hover:bg-white/15 cursor-default flex items-center gap-1.5 sm:gap-2"
+                  style={{ transitionDelay: `${index * 50}ms` }}
+                >
+                  <Icon className={`${stat.color} text-xs sm:text-sm md:text-base`} />
+                  <span className="text-gray-200 text-[11px] xs:text-xs sm:text-sm md:text-base whitespace-nowrap">
+                    {stat.label}
+                  </span>
+                </div>
+              )
+            })}
           </div>
           
-          {/* CTA Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
+          {/* CTA Button - Removed framer-motion */}
+          <button
             onClick={scrollToNext}
             className="group relative overflow-hidden rounded-full px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-5 bg-white text-black font-semibold text-sm sm:text-base md:text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20 flex items-center gap-2 mx-auto"
           >
@@ -153,16 +109,11 @@ export default function Hero() {
               <HiOutlineArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform duration-200" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-300 -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-          </motion.button>
+          </button>
         </div>
 
         {/* Scroll Hint - Responsive */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className={`absolute bottom-4 sm:bottom-6 md:bottom-8 lg:bottom-10 left-1/2 -translate-x-1/2`}
-        >
+        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 lg:bottom-10 left-1/2 -translate-x-1/2">
           <div className="flex flex-col items-center gap-1 sm:gap-2 animate-bounce">
             <span className="text-[8px] xs:text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider hidden xs:block">
               Scroll to explore
@@ -171,7 +122,7 @@ export default function Hero() {
               <div className="w-1 sm:w-1.5 h-1.5 xs:h-2 sm:h-3 bg-white rounded-full mt-1 xs:mt-2 sm:mt-2 animate-[scrollDown_1.5s_ease-in-out_infinite]" />
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -183,10 +134,14 @@ export default function Hero() {
           animation: scrollDown 1.5s ease-in-out infinite;
         }
         
-        /* Extra small devices (320px and up) */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Extra small devices */
         @media (min-width: 320px) {
           .xs\\:block { display: block; }
-          .xs\\:text-5xl { font-size: 3rem; }
         }
       `}</style>
     </section>

@@ -1,0 +1,22 @@
+📊 Video aur Image Requirements - Exact Count
+🎬 Videos Needed (Total: 6 Videos)
+#	Section	Video Content	Duration	Source
+1	Hero	Dubai Mall drone shot, exterior, fountain	10-15 sec	YouTube
+2	Retail	Luxury store walkthrough, shoppers	10-15 sec	YouTube
+3	Dining	Restaurant ambiance, food, people eating	8-10 sec	YouTube
+4	Events	Fashion show, concert, crowd	10-15 sec	YouTube
+5	Entertainment	Dubai Aquarium tunnel	8-10 sec	YouTube
+6	Entertainment	Dubai Fountain show	8-10 sec	YouTube
+Total: 6 videos (2-5 MB each, max 30 MB total)
+
+🖼️ AI Images Needed (Total: 8 Images)
+#	Section	Image Content	Tool
+1	Hero	Futuristic Dubai Mall aerial view	Midjourney
+2	Luxury	Fashion Avenue luxury render	Midjourney
+3	Retail	Premium shopping corridor	Midjourney
+4	Events	Brand activation mockup	Midjourney
+5	Dining	Fine dining with fountain view	DALL-E
+6	Sponsorship	Partnership event visualization	Midjourney
+7	Leasing	Pop-up store concept	DALL-E
+8	CTA	Dubai Mall future vision	Midjourney
+Total: 8 images (100-200 KB each, max 2 MB total)

@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
 import {
     HiOutlineArrowLeft,
     HiOutlineSparkles,
@@ -14,9 +13,8 @@ import {
     HiOutlinePhone,
 } from 'react-icons/hi'
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
-
-import { GiConverseShoe, GiShoppingBag, GiFoodTruck, GiShop } from 'react-icons/gi'
-import { FaCrown, FaStore, FaUtensils, FaCalendarAlt } from 'react-icons/fa'
+import { GiShop } from 'react-icons/gi'
+import { FaCrown, FaStore, FaUtensils } from 'react-icons/fa'
 
 const leasingCategories = [
     {
@@ -121,13 +119,10 @@ export default function LeasingPage() {
 
                 {/* Back Button */}
                 <Link href="/#retail">
-                    <motion.button
-                        whileHover={{ x: -5 }}
-                        className="mb-6 sm:mb-8 text-gray-400 hover:text-white transition flex items-center gap-2 group text-sm sm:text-base"
-                    >
+                    <button className="mb-6 sm:mb-8 text-gray-400 hover:text-white transition flex items-center gap-2 group text-sm sm:text-base">
                         <HiOutlineArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
                         Back to Main Deck
-                    </motion.button>
+                    </button>
                 </Link>
 
                 {/* Header */}
@@ -162,10 +157,11 @@ export default function LeasingPage() {
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
-                                className={`px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full transition-all duration-300 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base ${selectedCategory === cat.id
+                                className={`px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full transition-all duration-300 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base ${
+                                    selectedCategory === cat.id
                                         ? `bg-gradient-to-r ${cat.color} text-white shadow-lg`
                                         : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                    }`}
+                                }`}
                             >
                                 <CatIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${selectedCategory === cat.id ? 'text-white' : cat.iconColor}`} />
                                 <span>{cat.name}</span>
@@ -176,7 +172,6 @@ export default function LeasingPage() {
 
                 {/* Content Grid */}
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16">
-
                     {/* Left - Details */}
                     <div className="space-y-6">
                         <div className={`bg-gradient-to-br ${selected.color} rounded-2xl p-6 sm:p-8 text-white`}>
@@ -281,14 +276,10 @@ export default function LeasingPage() {
                             </button>
                         </form>
                         {submitted && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded-lg text-center text-green-400 text-sm flex items-center justify-center gap-2"
-                            >
+                            <div className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded-lg text-center text-green-400 text-sm flex items-center justify-center gap-2">
                                 <HiOutlineCheckCircle className="w-4 h-4" />
                                 Inquiry sent! Our team will contact you within 24 hours.
-                            </motion.div>
+                            </div>
                         )}
 
                         {/* Contact Info */}

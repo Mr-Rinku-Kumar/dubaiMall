@@ -9,21 +9,21 @@ const testimonials = [
     name: 'Sarah Johnson',
     role: 'CMO, Chanel Middle East',
     content: 'Dubai Mall has transformed how we reach luxury consumers. The foot traffic and brand visibility are unmatched anywhere in the world.',
-    image: 'https://randomuser.me/api/portraits/women/1.jpg',
+    image: '/images/woman1.jpg',
     rating: 5
   },
   {
     name: 'Michael Chen',
     role: 'VP of Partnerships, Apple',
     content: 'Our product launch at Dubai Mall reached over 50,000 people in 48 hours. The infrastructure and support team are world-class.',
-    image: 'https://randomuser.me/api/portraits/men/2.jpg',
+    image: '/images/woman2.jpg',
     rating: 5
   },
   {
     name: 'Elena Rodriguez',
     role: 'Event Director, Live Nation',
     content: 'The venue capabilities and production value available at Dubai Mall rival any major arena. Our concert series sold out in hours.',
-    image: 'https://randomuser.me/api/portraits/women/3.jpg',
+    image: '/images/woman3.jpg',
     rating: 5
   }
 ]
@@ -60,14 +60,14 @@ export default function Testimonials() {
                 <span key={i} className="text-yellow-500 text-2xl">★</span>
               ))}
             </div>
-            
+
             <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
               "{testimonials[current].content}"
             </p>
-            
+
             <div className="flex items-center justify-center gap-4 mt-8">
-              <img 
-                src={testimonials[current].image} 
+              <img
+                src={testimonials[current].image}
                 alt={testimonials[current].name}
                 className="w-12 h-12 rounded-full object-cover"
               />
@@ -85,9 +85,8 @@ export default function Testimonials() {
             <Button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                i === current ? 'w-8 bg-white' : 'bg-gray-600'
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-white' : 'bg-gray-600'
+                }`}
             />
           ))}
         </div>

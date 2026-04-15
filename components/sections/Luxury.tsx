@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
 import { 
   HiOutlineSparkles,
   HiOutlineStar,
@@ -11,15 +10,13 @@ import {
   HiOutlineUserGroup,
   HiOutlineTruck,
   HiOutlineGlobeAlt,
-  HiOutlineChip,
-  HiOutlineHeart,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineLocationMarker
 } from 'react-icons/hi'
-
-import {HiOutlinePaintBrush} from 'react-icons/hi2'
+import { HiOutlinePaintBrush } from 'react-icons/hi2'
 import { GiWatch } from 'react-icons/gi'
-import { FaUserTie, FaGem } from 'react-icons/fa'
-import { IoDiamondOutline } from 'react-icons/io5'  // This works!
+import { FaUserTie, FaGem, FaCrown } from 'react-icons/fa'
+import { IoDiamondOutline } from 'react-icons/io5'
 
 // Custom hook for intersection observer
 function useIntersectionObserver(options = { threshold: 0.3, triggerOnce: true }) {
@@ -52,16 +49,18 @@ function useIntersectionObserver(options = { threshold: 0.3, triggerOnce: true }
   return { ref, isVisible }
 }
 
-// Luxury brands list
+// Luxury brands list with React Icons
 const luxuryBrands = [
-  { name: 'Chanel', category: 'Fashion', icon: 'C', color: 'text-white' },
+  { name: 'Chanel', category: 'Fashion', icon: <FaCrown className="w-3 h-3" />, color: 'text-white' },
   { name: 'Louis Vuitton', category: 'Fashion', icon: 'LV', color: 'text-yellow-400' },
   { name: 'Gucci', category: 'Fashion', icon: 'G', color: 'text-red-400' },
   { name: 'Hermès', category: 'Fashion', icon: 'H', color: 'text-orange-400' },
   { name: 'Dior', category: 'Fashion', icon: 'D', color: 'text-blue-400' },
-  { name: 'Cartier', category: 'Jewelry', icon: <HiOutlineSparkles className="w-3 h-3" />, color: 'text-emerald-400' },
+  { name: 'Cartier', category: 'Jewelry', icon: <FaGem className="w-3 h-3" />, color: 'text-emerald-400' },
   { name: 'Rolex', category: 'Watches', icon: <GiWatch className="w-3 h-3" />, color: 'text-cyan-400' },
   { name: 'Prada', category: 'Fashion', icon: 'P', color: 'text-purple-400' },
+  { name: 'Fendi', category: 'Fashion', icon: 'F', color: 'text-pink-400' },
+  { name: 'Burberry', category: 'Fashion', icon: 'B', color: 'text-amber-400' },
 ]
 
 const luxuryFeatures = [
@@ -70,51 +69,76 @@ const luxuryFeatures = [
     title: '80+ Luxury Flagships',
     description: "World's most prestigious brands",
     color: 'from-yellow-600/20 to-amber-600/20',
-    iconColor: 'text-yellow-400'
+    iconColor: 'text-yellow-400',
+    stat: '80+'
   },
   {
-    icon: IoDiamondOutline,  // From react-icons/io5 - this works!
+    icon: IoDiamondOutline,
     title: 'Private Client Suites',
     description: 'Exclusive shopping experience',
     color: 'from-purple-600/20 to-pink-600/20',
-    iconColor: 'text-purple-400'
+    iconColor: 'text-purple-400',
+    stat: '6 Suites'
   },
   {
     icon: HiOutlineBell,
     title: 'VIP Concierge Services',
     description: 'Personal shopping assistants',
     color: 'from-blue-600/20 to-cyan-600/20',
-    iconColor: 'text-blue-400'
+    iconColor: 'text-blue-400',
+    stat: '24/7'
   },
   {
     icon: HiOutlinePaintBrush,
     title: 'Art Installations',
     description: 'Curated luxury experiences',
     color: 'from-emerald-600/20 to-teal-600/20',
-    iconColor: 'text-emerald-400'
+    iconColor: 'text-emerald-400',
+    stat: 'Year-round'
   }
 ]
 
 const exclusiveServices = [
-  { name: 'Personal Shopper', icon: HiOutlineUserGroup, color: 'text-yellow-400' },
-  { name: 'Private Viewing', icon: HiOutlineStar, color: 'text-purple-400' },
-  { name: 'Chauffeur Service', icon: HiOutlineTruck, color: 'text-blue-400' },
-  { name: 'International Shipping', icon: HiOutlineGlobeAlt, color: 'text-emerald-400' },
-  { name: 'VIP Lounge Access', icon: FaUserTie, color: 'text-pink-400' },
-  { name: 'Tax Free Shopping', icon: HiOutlineShieldCheck, color: 'text-green-400' }
+  { name: 'Personal Shopper', icon: HiOutlineUserGroup, color: 'text-yellow-400', desc: 'Dedicated assistance' },
+  { name: 'Private Viewing', icon: HiOutlineStar, color: 'text-purple-400', desc: 'Exclusive previews' },
+  { name: 'Chauffeur Service', icon: HiOutlineTruck, color: 'text-blue-400', desc: 'Luxury transport' },
+  { name: 'International Shipping', icon: HiOutlineGlobeAlt, color: 'text-emerald-400', desc: 'Worldwide delivery' },
+  { name: 'VIP Lounge Access', icon: FaUserTie, color: 'text-pink-400', desc: 'Premium comfort' },
+  { name: 'Tax Free Shopping', icon: HiOutlineShieldCheck, color: 'text-green-400', desc: 'Instant refund' },
+]
+
+const galleryImages = [
+  { src: '/images/luxury1.jpg', alt: 'Fashion Avenue Luxury Walkway' },
+  { src: '/images/luxury2.jpg', alt: 'Luxury Brand Storefront' },
+  { src: '/images/luxury3.jpg', alt: 'Premium Shopping Experience' },
+  { src: '/images/luxury4.jpg', alt: 'Elegant Fashion Display' },
 ]
 
 export default function Luxury() {
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.3, triggerOnce: true })
-  const [imageError, setImageError] = useState(false)
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({})
   const [selectedImage, setSelectedImage] = useState(0)
+  const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({})
+  const [hasAnimated, setHasAnimated] = useState(false)
 
-  const galleryImages = [
-    'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800&q=80',
-    'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80',
-    'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=800&q=80',
-    'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=800&q=80'
-  ]
+  // Trigger animations only once
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
+
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => ({ ...prev, [index]: true }))
+  }
+
+  const handleImageError = (index: number) => {
+    setImageErrors(prev => ({ ...prev, [index]: true }))
+  }
+
+  const currentImage = galleryImages[selectedImage]
 
   return (
     <section id="luxury" className="min-h-screen py-16 sm:py-20 md:py-24 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-black via-zinc-950 to-black snap-section">
@@ -123,7 +147,7 @@ export default function Luxury() {
         <div ref={ref as any}>
           {/* Header */}
           <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-4">
               The Pinnacle of Luxury
@@ -134,6 +158,9 @@ export default function Luxury() {
                 Where Elegance Meets Excellence
               </span>
             </h2>
+            <p className="text-gray-400 mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+              Experience the world's most prestigious collection of luxury brands
+            </p>
           </div>
 
           {/* Main Content Grid */}
@@ -143,25 +170,33 @@ export default function Luxury() {
             <div className="space-y-4 sm:space-y-6">
               {/* Main Image */}
               <div className={`relative rounded-2xl overflow-hidden aspect-[4/5] transition-all duration-700 delay-100 ${
-                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                shouldAnimate ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}>
-                {!imageError ? (
+                {/* Loading Skeleton */}
+                {!loadedImages[selectedImage] && !imageErrors[selectedImage] && (
+                  <div className="absolute inset-0 shimmer bg-gray-800 z-10" />
+                )}
+                
+                {!imageErrors[selectedImage] ? (
                   <img
-                    src={galleryImages[selectedImage]}
-                    alt="Fashion Avenue Dubai Mall"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    onError={() => setImageError(true)}
+                    src={currentImage.src}
+                    alt={currentImage.alt}
+                    className={`w-full h-full object-cover hover:scale-105 transition-transform duration-700 ${
+                      loadedImages[selectedImage] ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    onLoad={() => handleImageLoad(selectedImage)}
+                    onError={() => handleImageError(selectedImage)}
                     loading="eager"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-yellow-900/30 to-black flex items-center justify-center">
-                    <HiOutlineSparkles className="w-16 h-16 text-yellow-500/50" />
+                    <FaCrown className="w-16 h-16 text-yellow-500/50" />
                   </div>
                 )}
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
-                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur rounded-full px-3 py-1">
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur rounded-full px-3 py-1 z-20">
                   <span className="text-xs text-yellow-400 flex items-center gap-1">
                     <HiOutlineStar className="w-3 h-3" /> Premium Wing
                   </span>
@@ -179,8 +214,8 @@ export default function Luxury() {
                     }`}
                   >
                     <img
-                      src={img}
-                      alt={`Luxury gallery ${idx + 1}`}
+                      src={img.src}
+                      alt={img.alt}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -194,7 +229,7 @@ export default function Luxury() {
 
             {/* Right Side - Content */}
             <div className={`space-y-6 sm:space-y-8 transition-all duration-700 delay-200 ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+              shouldAnimate ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
             }`}>
               {/* Description */}
               <div>
@@ -205,7 +240,7 @@ export default function Luxury() {
                 </p>
               </div>
 
-              {/* Features Grid with React Icons */}
+              {/* Features Grid */}
               <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                 {luxuryFeatures.map((feature, idx) => {
                   const Icon = feature.icon
@@ -213,10 +248,15 @@ export default function Luxury() {
                     <div
                       key={feature.title}
                       className={`glass-card rounded-xl p-4 hover:scale-102 transition-all duration-300 group cursor-default bg-gradient-to-br ${feature.color}`}
-                      style={{ transitionDelay: `${200 + idx * 50}ms` }}
+                      style={{ transitionDelay: `${idx * 50}ms` }}
                     >
                       <div className="flex items-start gap-3">
-                        <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${feature.iconColor} group-hover:scale-110 transition-transform`} />
+                        <div className="relative">
+                          <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${feature.iconColor} group-hover:scale-110 transition-transform`} />
+                          <span className="absolute -top-2 -right-2 text-[10px] font-bold text-yellow-400 bg-black/50 rounded-full px-1">
+                            {feature.stat}
+                          </span>
+                        </div>
                         <div>
                           <h3 className="text-sm sm:text-base font-semibold text-white">
                             {feature.title}
@@ -236,6 +276,7 @@ export default function Luxury() {
                 <p className="text-xs uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
                   <HiOutlineSparkles className="w-3 h-3 text-yellow-400" />
                   Featured Maisons
+                  <span className="text-[10px] text-gray-600">| 10+ Luxury Brands</span>
                 </p>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {luxuryBrands.map((brand, idx) => (
@@ -263,12 +304,31 @@ export default function Luxury() {
                   {exclusiveServices.map((service, idx) => {
                     const Icon = service.icon
                     return (
-                      <span key={service.name} className="text-xs sm:text-sm text-gray-300 flex items-center gap-1.5">
-                        <Icon className={`w-3 h-3 ${service.color}`} />
-                        {service.name}
-                      </span>
+                      <div key={service.name} className="group">
+                        <span className="text-xs sm:text-sm text-gray-300 flex items-center gap-1.5">
+                          <Icon className={`w-3 h-3 ${service.color} group-hover:scale-110 transition-transform`} />
+                          <span className="group-hover:text-white transition-colors">{service.name}</span>
+                        </span>
+                        <p className="text-[8px] sm:text-[10px] text-gray-500 ml-5">{service.desc}</p>
+                      </div>
                     )
                   })}
+                </div>
+              </div>
+
+              {/* Quick Stats Bar */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="glass-card rounded-xl p-2 sm:p-3 text-center">
+                  <div className="text-yellow-400 text-lg sm:text-xl font-bold">2.5M+</div>
+                  <div className="text-gray-500 text-[8px] sm:text-[10px]">Monthly Visitors</div>
+                </div>
+                <div className="glass-card rounded-xl p-2 sm:p-3 text-center">
+                  <div className="text-yellow-400 text-lg sm:text-xl font-bold">$5K+</div>
+                  <div className="text-gray-500 text-[8px] sm:text-[10px]">Avg. Transaction</div>
+                </div>
+                <div className="glass-card rounded-xl p-2 sm:p-3 text-center">
+                  <div className="text-yellow-400 text-lg sm:text-xl font-bold">40+</div>
+                  <div className="text-gray-500 text-[8px] sm:text-[10px]">Countries</div>
                 </div>
               </div>
 

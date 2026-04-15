@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import {
   HiOutlineShoppingBag,
   HiOutlineClock,
@@ -46,7 +45,7 @@ function useIntersectionObserver(options = { threshold: 0.2, triggerOnce: true }
   return { ref, isVisible }
 }
 
-// Tilt Card Component
+// Simple Tilt Card - CSS only, no Framer Motion
 function TiltCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const [rotateX, setRotateX] = useState(0)
   const [rotateY, setRotateY] = useState(0)
@@ -71,17 +70,19 @@ function TiltCard({ children, className = '' }: { children: React.ReactNode; cla
   }
 
   return (
-    <motion.div
+    <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      animate={{ rotateX, rotateY }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      style={{
+        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+        transition: 'transform 0.1s ease-out',
+        transformStyle: 'preserve-3d'
+      }}
       className={`relative ${className}`}
-      style={{ transformStyle: 'preserve-3d' }}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }
 
@@ -102,6 +103,26 @@ const brandCategories = [
 export default function Retail() {
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2, triggerOnce: true })
   const [videoError, setVideoError] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Lazy load video - only when section is visible
+  useEffect(() => {
+    if (isVisible && !shouldPlayVideo) {
+      setShouldPlayVideo(true)
+    }
+  }, [isVisible, shouldPlayVideo])
+
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
 
   return (
     <section id="retail" className="min-h-screen py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-zinc-950 to-black snap-section">
@@ -109,42 +130,56 @@ export default function Retail() {
 
         {/* Video/Image Section */}
         <div ref={ref as any}>
-          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-12 sm:mb-16 aspect-video transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            }`}>
-            {/* Video with fallback to Unsplash image */}
-            {!videoError ? (
-              <div className="relative w-full h-full">
-                <iframe
-                  src="https://www.youtube.com/embed/xshkQS54Eww?autoplay=1&mute=1&loop=1&playlist=xshkQS54Eww&controls=0&modestbranding=1&rel=0"
-                  title="Dubai Mall Retail Experience"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                />
-              </div>
+          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-12 sm:mb-16 aspect-video transition-all duration-700 ${
+            shouldAnimate ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
+            
+            {/* Loading Skeleton */}
+            {!videoLoaded && !videoError && (
+              <div className="absolute inset-0 shimmer bg-gray-900/50 z-10" />
+            )}
+            
+            {/* Video with fallback to image - Only loads when visible */}
+            {shouldPlayVideo && !videoError ? (
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                onLoadedData={() => setVideoLoaded(true)}
+                onError={() => setVideoError(true)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                  videoLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <source src="/videos/retail.mp4" type="video/mp4" />
+              </video>
             ) : (
               <img
                 src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80"
                 alt="Dubai Mall Retail"
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             )}
+            
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
 
             {/* Overlay Text */}
-            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
-              <p className="text-white/80 text-xs sm:text-sm flex items-center gap-2">
-                <HiOutlineShoppingBag className="text-yellow-400" />
+            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20">
+              <p className="text-white/80 text-xs sm:text-sm flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-3 py-1 w-fit">
+                <HiOutlineShoppingBag className="text-yellow-400 w-3 h-3" />
                 1,200+ Stores • 12M+ sq ft of Retail Space
               </p>
             </div>
           </div>
 
-          {/* Content */}
-          <div className={`text-center mb-10 sm:mb-12 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Content - CSS transitions instead of Framer */}
+          <div className={`text-center mb-10 sm:mb-12 transition-all duration-700 delay-100 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 flex items-center justify-center gap-2">
               <HiOutlineOfficeBuilding className="text-yellow-400" />
               Retail Ecosystem
@@ -161,16 +196,17 @@ export default function Retail() {
             </p>
           </div>
 
-          {/* Brand Categories - Responsive Grid with React Icons */}
-          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Brand Categories - CSS transitions */}
+          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-200 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             {brandCategories.map((category, index) => {
               const Icon = category.icon
               return (
                 <div
                   key={category.name}
                   className="glass-card rounded-xl p-3 sm:p-4 text-center hover:scale-105 transition-all duration-300"
-                  style={{ transitionDelay: `${200 + index * 50}ms` }}
+                  style={{ transitionDelay: `${index * 50}ms` }}
                 >
                   <Icon className={`text-3xl sm:text-4xl mx-auto mb-2 ${category.color}`} />
                   <div className="text-xs sm:text-sm font-semibold text-white">{category.name}</div>
@@ -180,14 +216,15 @@ export default function Retail() {
             })}
           </div>
 
-          {/* Brand Logo Grid - Responsive */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Brand Logo Grid - CSS transitions only */}
+          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             {brands.map((brand, i) => (
               <TiltCard key={brand} className="w-full">
                 <div
                   className="glass-card rounded-xl p-3 sm:p-4 text-center transition-all duration-300 hover:bg-white/10 cursor-pointer group"
-                  style={{ transitionDelay: `${300 + i * 30}ms` }}
+                  style={{ transitionDelay: `${i * 30}ms` }}
                 >
                   <HiOutlineShoppingCart className="text-gray-500 group-hover:text-yellow-400 transition-colors duration-300 text-lg sm:text-xl mx-auto mb-2 opacity-0 group-hover:opacity-100" />
                   <span className="text-gray-400 group-hover:text-white transition-colors duration-300 text-xs sm:text-sm md:text-base font-medium">
@@ -198,9 +235,10 @@ export default function Retail() {
             ))}
           </div>
 
-          {/* Additional Info Bar with React Icons */}
-          <div className={`glass rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Additional Info Bar - CSS transitions */}
+          <div className={`glass rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 transition-all duration-700 delay-500 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <div className="text-center sm:text-left flex items-center gap-3">
               <HiOutlineTrendingUp className="text-yellow-400 text-2xl" />
               <div>
@@ -226,9 +264,10 @@ export default function Retail() {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className={`text-center mt-10 sm:mt-12 transition-all duration-700 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* CTA Button - CSS transitions */}
+          <div className={`text-center mt-10 sm:mt-12 transition-all duration-700 delay-600 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <button className="group relative overflow-hidden rounded-full px-6 sm:px-8 py-3 sm:py-3.5 bg-white text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20">
               <span className="relative z-10 flex items-center gap-2">
                 Explore Leasing Opportunities

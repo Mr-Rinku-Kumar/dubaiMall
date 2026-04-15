@@ -1,24 +1,23 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { 
+import {
   HiOutlineSparkles,
   HiOutlineStar,
   HiOutlineGlobeAlt,
   HiOutlineMoon,
   HiOutlineArrowRight,
-  HiOutlineChevronRight
+  HiOutlineChevronRight,
+  HiOutlineLocationMarker
 } from 'react-icons/hi'
-import { 
-  GiNoodles, 
-  GiSushis, 
-  GiChopsticks, 
-  GiHamburger, 
-  GiOlive, 
+import {
+  GiNoodles,
+  GiSushis,
+  GiChopsticks,
+  GiHamburger,
+  GiOlive,
   GiCroissant,
   GiPizzaSlice,
-  GiHotDog,
   GiTacos
 } from 'react-icons/gi'
 import { FaUtensils, FaWineGlassAlt, FaCoffee } from 'react-icons/fa'
@@ -54,52 +53,56 @@ function useIntersectionObserver(options = { threshold: 0.2, triggerOnce: true }
   return { ref, isVisible }
 }
 
-// Dining data with Unsplash images
+// Dining data with local images
 const diningImages = [
-  { 
-    src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80', 
-    name: 'Fine Dining', 
+  {
+    src: '/images/finedining.jpg',
+    name: 'Fine Dining',
     cuisine: 'International',
     rating: 4.9,
     price: '$$$$',
-    icon: FaUtensils
+    icon: FaUtensils,
+    location: 'Fashion Avenue Level 2'
   },
-  { 
-    src: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&q=80', 
-    name: 'Social House', 
+  {
+    src: '/images/socialhouse.jpg',
+    name: 'Social House',
     cuisine: 'Asian Fusion',
     rating: 4.7,
     price: '$$$',
-    icon: GiNoodles
+    icon: GiNoodles,
+    location: 'Waterfront Promenade'
   },
-  { 
-    src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80', 
-    name: 'Tribes', 
+  {
+    src: '/images/tribes.jpg',
+    name: 'Tribes',
     cuisine: 'African',
     rating: 4.8,
     price: '$$$',
-    icon: FaCoffee
+    icon: FaCoffee,
+    location: 'Grand Atrium'
   },
-  { 
-    src: 'https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=400&q=80', 
-    name: 'The Cheesecake Factory', 
+  {
+    src: '/images/cheesfactory.jpg',
+    name: 'The Cheesecake Factory',
     cuisine: 'American',
     rating: 4.6,
     price: '$$',
-    icon: GiHamburger
+    icon: GiHamburger,
+    location: 'Level 1'
   },
 ]
 
-// Cuisine types with ONLY existing React Icons
+// Cuisine types with correct React Icons
 const cuisineTypes = [
   { name: 'Italian', count: 25, icon: GiPizzaSlice, color: 'text-red-400' },
   { name: 'Japanese', count: 18, icon: GiSushis, color: 'text-pink-400' },
   { name: 'Chinese', count: 22, icon: GiNoodles, color: 'text-red-500' },
-  { name: 'Indian', count: 15, icon: GiTacos, color: 'text-orange-400' }, // Using Tacos as substitute
+  { name: 'Indian', count: 15, icon: GiTacos, color: 'text-orange-400' },
   { name: 'French', count: 12, icon: GiCroissant, color: 'text-blue-400' },
   { name: 'Mediterranean', count: 20, icon: GiOlive, color: 'text-green-400' },
   { name: 'American', count: 30, icon: GiHamburger, color: 'text-yellow-400' },
-  { name: 'Middle Eastern', count: 28, icon: GiOlive, color: 'text-emerald-400' }, // Using Olive as substitute
+  { name: 'Middle Eastern', count: 28, icon: GiOlive, color: 'text-emerald-400' },
 ]
 
 const diningStats = [
@@ -119,21 +122,44 @@ const featuredRestaurants = [
 export default function Dining() {
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2, triggerOnce: true })
   const [videoError, setVideoError] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
   const [loadedImages, setLoadedImages] = useState<{ [key: string]: boolean }>({})
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({})
+
+  // Lazy load video - only when section is visible
+  useEffect(() => {
+    if (isVisible && !shouldPlayVideo) {
+      setShouldPlayVideo(true)
+    }
+  }, [isVisible, shouldPlayVideo])
+
+  // Trigger animations only once
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
 
   const handleImageLoad = (name: string) => {
     setLoadedImages(prev => ({ ...prev, [name]: true }))
   }
 
+  const handleImageError = (name: string) => {
+    setImageErrors(prev => ({ ...prev, [name]: true }))
+  }
+
   return (
     <section id="dining" className="min-h-screen py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-zinc-950 to-black snap-section">
       <div className="max-w-7xl mx-auto">
-        
+
         <div ref={ref as any}>
           {/* Header */}
-          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-4">
               Culinary Excellence
             </span>
@@ -149,17 +175,16 @@ export default function Dining() {
             </p>
           </div>
 
-          {/* Stats Row with React Icons */}
-          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+          {/* Stats Row */}
+          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
             {diningStats.map((stat, idx) => {
               const Icon = stat.icon
               return (
                 <div
                   key={stat.label}
                   className="glass-card rounded-xl p-3 sm:p-4 text-center hover:scale-105 transition-all duration-300"
-                  style={{ transitionDelay: `${100 + idx * 50}ms` }}
+                  style={{ transitionDelay: `${idx * 50}ms` }}
                 >
                   <Icon className={`w-6 h-6 sm:w-7 sm:h-7 mx-auto mb-2 ${stat.color}`} />
                   <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400">
@@ -173,12 +198,11 @@ export default function Dining() {
 
           {/* Main Content - Left/Right Layout */}
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16">
-            
+
             {/* LEFT SIDE - Sticky Content */}
             <div className="lg:w-2/5 lg:sticky lg:top-24 h-fit">
-              <div className={`space-y-4 sm:space-y-6 transition-all duration-700 delay-200 ${
-                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-              }`}>
+              <div className={`space-y-4 sm:space-y-6 transition-all duration-700 delay-200 ${shouldAnimate ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+                }`}>
                 <div>
                   <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
                     From Michelin-starred fine dining to authentic street food.
@@ -186,7 +210,7 @@ export default function Dining() {
                   </p>
                 </div>
 
-                {/* Cuisine Types Grid with React Icons */}
+                {/* Cuisine Types Grid */}
                 <div>
                   <p className="text-xs uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
                     <HiOutlineSparkles className="w-3 h-3 text-yellow-400" />
@@ -199,7 +223,7 @@ export default function Dining() {
                         <div
                           key={cuisine.name}
                           className="flex items-center gap-2 glass-card rounded-lg p-2 hover:bg-white/5 transition-all duration-300"
-                          style={{ transitionDelay: `${200 + idx * 30}ms` }}
+                          style={{ transitionDelay: `${idx * 30}ms` }}
                         >
                           <Icon className={`text-lg ${cuisine.color}`} />
                           <div>
@@ -265,27 +289,32 @@ export default function Dining() {
             {/* RIGHT SIDE - Visual Grid */}
             <div className="lg:w-3/5">
               {/* Video Section */}
-              <div className={`rounded-xl sm:rounded-2xl overflow-hidden mb-4 sm:mb-6 aspect-video transition-all duration-700 delay-300 ${
-                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              }`}>
-                {!videoError ? (
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    onError={() => setVideoError(true)}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    poster="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80"
-                  >
-                    <source src="/videos/dubai6.mp4" type="video/mp4" />
-                  </video>
+              <div className={`rounded-xl sm:rounded-2xl overflow-hidden mb-4 sm:mb-6 aspect-video transition-all duration-700 delay-300 ${shouldAnimate ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                }`}>
+                {shouldPlayVideo && !videoError ? (
+                  <>
+                    {!videoLoaded && (
+                      <div className="absolute inset-0 shimmer bg-gray-800 z-10" />
+                    )}
+                    <video
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      onLoadedData={() => setVideoLoaded(true)}
+                      onError={() => setVideoError(true)}
+                      className={`w-full h-full object-cover hover:scale-105 transition-transform duration-700 ${videoLoaded ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      poster="/images/dining-poster.jpg"
+                    >
+                      <source src="/videos/dining1.mp4" type="video/mp4" />
+                    </video>
+                  </>
                 ) : (
-                  <img
-                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80"
-                    alt="Dining at Dubai Mall"
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                    <span className="text-6xl">🍽️</span>
+                  </div>
                 )}
               </div>
 
@@ -296,27 +325,33 @@ export default function Dining() {
                   return (
                     <div
                       key={item.name}
-                      className={`group relative rounded-xl overflow-hidden aspect-square cursor-pointer transition-all duration-500 ${
-                        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                      }`}
-                      style={{ transitionDelay: `${300 + i * 100}ms` }}
+                      className={`group relative rounded-xl overflow-hidden aspect-square cursor-pointer transition-all duration-500 ${shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                        }`}
+                      style={{ transitionDelay: `${i * 100}ms` }}
                     >
                       {/* Loading skeleton */}
-                      {!loadedImages[item.name] && (
+                      {!loadedImages[item.name] && !imageErrors[item.name] && (
                         <div className="absolute inset-0 shimmer bg-gray-800" />
                       )}
-                      
-                      <img
-                        src={item.src}
-                        alt={item.name}
-                        className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
-                          loadedImages[item.name] ? 'opacity-100' : 'opacity-0'
-                        }`}
-                        onLoad={() => handleImageLoad(item.name)}
-                        loading="lazy"
-                      />
-                      
-                      {/* Enhanced Overlay */}
+
+                      {/* Image with fallback */}
+                      {!imageErrors[item.name] ? (
+                        <img
+                          src={item.src}
+                          alt={item.name}
+                          className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${loadedImages[item.name] ? 'opacity-100' : 'opacity-0'
+                            }`}
+                          onLoad={() => handleImageLoad(item.name)}
+                          onError={() => handleImageError(item.name)}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                          <Icon className="w-12 h-12 text-gray-500" />
+                        </div>
+                      )}
+
+                      {/* Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
                         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
                           <div className="flex items-center justify-between">
@@ -327,12 +362,18 @@ export default function Dining() {
                                   {item.name}
                                 </span>
                               </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <HiOutlineLocationMarker className="w-3 h-3 text-gray-400" />
+                                <span className="text-gray-300 text-xs">
+                                  {item.location}
+                                </span>
+                              </div>
                               <span className="text-gray-300 text-xs">
                                 {item.cuisine} • {item.price}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <HiOutlineStar className="w-3 h-3 text-yellow-400" />
+                              <HiOutlineStar className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                               <span className="text-white text-sm">{item.rating}</span>
                             </div>
                           </div>

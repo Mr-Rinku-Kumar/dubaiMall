@@ -49,7 +49,8 @@ export default function Newsletter() {
         initial={{ opacity: 0, x: 50, y: 50 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         exit={{ opacity: 0, x: 50, y: 50 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        // Changed from spring to tween for better performance
+        transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm md:max-w-md"
       >
         <div className="glass rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black/50">

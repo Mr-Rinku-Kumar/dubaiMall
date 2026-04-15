@@ -5,12 +5,12 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 80px; /* Fixed for better anchor navigation */
+    scroll-padding-top: 70px;
   }
   
   body {
     @apply bg-black text-white overflow-x-hidden;
-    font-size: 16px; /* Base font size for better mobile readability */
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -20,7 +20,6 @@
   a,
   [role="button"] {
     @apply touch-manipulation;
-    min-height: 44px;
     min-width: 44px;
   }
   
@@ -79,25 +78,21 @@
     transform: translateY(-5px);
   }
   
-  /* Responsive glass effect for mobile */
   @media (max-width: 768px) {
     .glass-card:hover {
       transform: translateY(-2px);
     }
   }
   
-  /* Snap sections - improved */
+  /* Snap sections */
   .snap-section {
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
   
-  /* Responsive snap scrolling - only on desktop */
-  @media (min-width: 1024px) {
-    .snap-container {
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
-      height: 100vh;
+  @media (max-width: 768px) {
+    .snap-section {
+      scroll-snap-align: start;
     }
   }
   
@@ -115,7 +110,6 @@
     color: transparent;
   }
   
-  /* Responsive gradient sizes */
   @media (max-width: 640px) {
     .gradient-text, .gradient-gold {
       background-size: 100% 100%;
@@ -146,7 +140,7 @@
   }
   
   .hide-scrollbar::-webkit-scrollbar {
-    height: 4px;
+    height: 3px;
   }
   
   /* Responsive padding utilities */
@@ -176,24 +170,29 @@
     }
   }
   
-  /* Better text contrast on mobile */
   @media (max-width: 640px) {
     .text-shadow-sm {
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
   }
   
-  /* Container max-width utilities */
   .container-responsive {
     width: 100%;
     max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
   
   @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
     .container-responsive {
       padding-left: 1.5rem;
       padding-right: 1.5rem;
@@ -208,29 +207,29 @@
   }
 }
 
-/* Responsive Scrollbar - Thinner on mobile */
+/* Responsive Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
   height: 3px;
 }
 
 @media (min-width: 640px) {
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 4px;
     height: 4px;
   }
 }
 
 @media (min-width: 768px) {
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
     height: 5px;
   }
 }
 
 @media (min-width: 1024px) {
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
     height: 6px;
   }
 }
@@ -254,40 +253,12 @@
   height: 3px;
 }
 
-@media (min-width: 640px) {
-  ::-webkit-scrollbar:horizontal {
-    height: 4px;
-  }
-}
-
-@media (min-width: 1024px) {
-  ::-webkit-scrollbar:horizontal {
-    height: 6px;
-  }
-}
-
-::-webkit-scrollbar-track:horizontal {
-  background: #1a1a1a;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:horizontal {
-  background: #3a3a3a;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:horizontal:hover {
-  background: #555;
-}
-
 /* Mobile optimizations */
 @media (max-width: 640px) {
-  /* Reduce animations on mobile for better performance */
   .glass-card {
     transition: all 0.2s ease;
   }
   
-  /* Better touch feedback */
   button:active,
   a:active,
   .glass-card:active {
@@ -295,10 +266,14 @@
     transition: transform 0.05s;
   }
   
-  /* Improve tap highlight */
   button,
   a {
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Fix for off-canvas menu */
+  .fixed {
+    position: fixed;
   }
 }
 
@@ -318,7 +293,7 @@
   }
 }
 
-/* Smooth transitions for all interactive elements */
+/* Smooth transitions */
 button, 
 a,
 .glass-card,
@@ -326,7 +301,7 @@ a,
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Reduce motion for users who prefer it */
+/* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -358,19 +333,6 @@ a,
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-/* Utility for sticky elements on mobile */
-.sticky-mobile {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-@media (min-width: 768px) {
-  .sticky-mobile {
-    position: static;
-  }
 }
 
 /* Better image rendering */
@@ -409,4 +371,37 @@ img {
 ::-moz-selection {
   background: rgba(255, 215, 0, 0.3);
   color: #fff;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Fix for mobile menu - prevent overflow */
+.overflow-hidden-mobile {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Ensure content doesn't overflow on mobile */
+@media (max-width: 640px) {
+  .max-w-7xl {
+    max-width: 100%;
+  }
+  
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }

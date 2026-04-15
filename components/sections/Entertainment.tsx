@@ -1,25 +1,19 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { 
   HiOutlineSparkles,
   HiOutlineStar,
   HiOutlineUsers,
-  HiOutlineChip,
-  HiOutlineCalendar,
-  HiOutlineDeviceTablet,
-  HiOutlineFilm,
-  HiOutlineTicket
+  HiOutlineTicket,
+  HiOutlinePlay
 } from 'react-icons/hi'
 import { MdGirl } from "react-icons/md";
 import { 
   GiFishbone, 
   GiIceSkate, 
   GiVrHeadset, 
-  GiWaterFountain, 
-  GiFilmStrip,
-  GiPolarStar
+  GiFilmStrip
 } from 'react-icons/gi'
 import { FaWater } from 'react-icons/fa'
 
@@ -27,6 +21,7 @@ interface Attraction {
   name: string
   desc: string
   longDesc: string
+  video: string
   image: string
   stats: { [key: string]: string | number }
   icon: any
@@ -39,6 +34,7 @@ const attractions: Attraction[] = [
     name: 'Dubai Aquarium',
     desc: '10M+ liters • 140+ species',
     longDesc: 'Walk through a 48-meter tunnel surrounded by sharks, rays, and thousands of aquatic animals.',
+    video: '/videos/aquarium.mp4',
     image: 'https://images.unsplash.com/photo-1582653291997-079a1b04e6d1?w=800&q=80',
     stats: { visitors: '10M+', species: 140 },
     icon: GiFishbone,
@@ -49,6 +45,7 @@ const attractions: Attraction[] = [
     name: 'Dubai Ice Rink',
     desc: 'Olympic-sized • Year-round',
     longDesc: 'Glide on real ice in the middle of the desert. Skate rentals and lessons available.',
+    video: '/videos/icerink.mp4',
     image: 'https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?w=800&q=80',
     stats: { capacity: '200', size: 'Olympic' },
     icon: GiIceSkate,
@@ -59,6 +56,7 @@ const attractions: Attraction[] = [
     name: 'VR Park',
     desc: 'Immersive • Next-gen tech',
     longDesc: 'Over 30 cutting-edge virtual reality experiences for all ages.',
+    video: '/videos/vrpark.mp4',
     image: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=800&q=80',
     stats: { experiences: 30, tech: 'VR/AR' },
     icon: GiVrHeadset,
@@ -69,6 +67,7 @@ const attractions: Attraction[] = [
     name: 'Dubai Fountain',
     desc: "World's largest choreographed",
     longDesc: 'Daily shows with water shooting up to 500 feet, synchronized to music.',
+    video: '/videos/fountain.mp4',
     image: 'https://images.unsplash.com/photo-1536859357188-b3559ae7b35b?w=800&q=80',
     stats: { height: '500ft', shows: 'Daily' },
     icon: FaWater,
@@ -79,6 +78,7 @@ const attractions: Attraction[] = [
     name: 'KidZania',
     desc: 'Edutainment • Role-playing',
     longDesc: 'A mini-city where kids can try out different professions.',
+    video: '/videos/kidzania.mp4',
     image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=800&q=80',
     stats: { roles: 60, age: '4-16' },
     icon: MdGirl,
@@ -89,6 +89,7 @@ const attractions: Attraction[] = [
     name: 'Cinema City',
     desc: '24 screens • IMAX • VIP',
     longDesc: 'State-of-the-art multiplex with luxury seating and gourmet concessions.',
+    video: '/videos/cinema.mp4',
     image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80',
     stats: { screens: 24, seats: '4,500+' },
     icon: GiFilmStrip,
@@ -107,16 +108,72 @@ const quickStats = [
 export default function Entertainment() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [activeCard, setActiveCard] = useState<number | null>(null)
+  const [videoErrors, setVideoErrors] = useState<{ [key: string]: boolean }>({})
+  const [videoLoaded, setVideoLoaded] = useState<{ [key: string]: boolean }>({})
+  const [visibleVideos, setVisibleVideos] = useState<{ [key: string]: boolean }>({})
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  // Track which videos are visible in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const videoId = entry.target.getAttribute('data-video-id')
+          if (videoId && entry.isIntersecting) {
+            setVisibleVideos(prev => ({ ...prev, [videoId]: true }))
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '100px' } // Load slightly before visible
+    )
+
+    // Observe all video containers
+    const videoElements = document.querySelectorAll('[data-video-container]')
+    videoElements.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Trigger animations only once
+  useEffect(() => {
+    if (!hasAnimated && sectionRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setHasAnimated(true)
+            observer.disconnect()
+          }
+        },
+        { threshold: 0.1 }
+      )
+      observer.observe(sectionRef.current)
+      return () => observer.disconnect()
+    }
+  }, [hasAnimated])
+
+  const handleVideoError = (name: string) => {
+    setVideoErrors(prev => ({ ...prev, [name]: true }))
+  }
+
+  const handleVideoLoad = (name: string) => {
+    setVideoLoaded(prev => ({ ...prev, [name]: true }))
+  }
+
+  const shouldAnimate = hasAnimated
 
   return (
     <section
       id="entertainment"
+      ref={sectionRef}
       className="min-h-screen py-16 sm:py-20 md:py-24 bg-gradient-to-b from-black to-zinc-950 snap-section"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         
-        {/* Header */}
-        <div className="text-center mb-10 sm:mb-12 md:mb-16">
+        {/* Header - CSS transitions */}
+        <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${
+          shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
           <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-4">
             Beyond Shopping
           </span>
@@ -128,8 +185,10 @@ export default function Entertainment() {
           </p>
         </div>
 
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10 max-w-2xl mx-auto">
+        {/* Quick Stats Row - CSS transitions */}
+        <div className={`grid grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10 max-w-2xl mx-auto transition-all duration-700 delay-100 ${
+          shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
           {quickStats.map((stat, idx) => {
             const Icon = stat.icon
             return (
@@ -155,9 +214,16 @@ export default function Entertainment() {
           <div className="flex gap-4 sm:gap-6 md:gap-8" style={{ width: 'max-content' }}>
             {attractions.map((attraction, i) => {
               const Icon = attraction.icon
+              const hasVideoError = videoErrors[attraction.name]
+              const isVideoLoaded = videoLoaded[attraction.name]
+              const isVideoVisible = visibleVideos[attraction.name]
+              const shouldLoadVideo = isVideoVisible || activeCard === i
+              
               return (
                 <div
                   key={attraction.name}
+                  data-video-container
+                  data-video-id={attraction.name}
                   onMouseEnter={() => setActiveCard(i)}
                   onMouseLeave={() => setActiveCard(null)}
                   className={`relative w-[85vw] sm:w-[70vw] md:w-[55vw] lg:w-[40vw] xl:w-[35vw] 
@@ -165,25 +231,54 @@ export default function Entertainment() {
                     transition-all duration-500 hover:scale-[1.02] cursor-pointer group`}
                   style={{ scrollSnapAlign: 'start' }}
                 >
-                  {/* Background Image */}
-                  <img
-                    src={attraction.image}
-                    alt={attraction.name}
-                    className="absolute w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                  />
+                  {/* Loading Skeleton */}
+                  {shouldLoadVideo && !isVideoLoaded && !hasVideoError && (
+                    <div className="absolute inset-0 shimmer bg-gray-900/50 z-10" />
+                  )}
+
+                  {/* Video Background - Only loads when visible */}
+                  {shouldLoadVideo && !hasVideoError ? (
+                    <video
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      onLoadedData={() => handleVideoLoad(attraction.name)}
+                      onError={() => handleVideoError(attraction.name)}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                        isVideoLoaded ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <source src={attraction.video} type="video/mp4" />
+                    </video>
+                  ) : null}
+
+                  {/* Fallback Image */}
+                  {(!shouldLoadVideo || hasVideoError || !isVideoLoaded) && (
+                    <img
+                      src={attraction.image}
+                      alt={attraction.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                      loading="lazy"
+                    />
+                  )}
 
                   {/* Gradient Overlays */}
                   <div className={`absolute inset-0 bg-gradient-to-t ${attraction.color} opacity-60 group-hover:opacity-40 transition-opacity duration-500`} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-                  {/* Icon Badge */}
-                  <div className="absolute top-4 right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 backdrop-blur flex items-center justify-center">
-                    <Icon className={`text-xl sm:text-2xl ${attraction.iconColor}`} />
+                  {/* Play Icon Badge */}
+                  <div className="absolute top-4 right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 backdrop-blur flex items-center justify-center group-hover:scale-110 transition-transform duration-300 z-20">
+                    {shouldLoadVideo && !hasVideoError ? (
+                      <HiOutlinePlay className="text-white text-xl sm:text-2xl" />
+                    ) : (
+                      <Icon className={`text-xl sm:text-2xl ${attraction.iconColor}`} />
+                    )}
                   </div>
 
                   {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 z-20">
                     <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white">
                       {attraction.name}
                     </h3>
@@ -214,7 +309,7 @@ export default function Entertainment() {
                   </div>
 
                   {/* Card Number Indicator */}
-                  <div className="absolute top-4 left-4 text-white/30 text-xs sm:text-sm font-mono">
+                  <div className="absolute top-4 left-4 text-white/30 text-xs sm:text-sm font-mono z-20">
                     {(i + 1).toString().padStart(2, '0')}
                   </div>
                 </div>
@@ -224,7 +319,9 @@ export default function Entertainment() {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="flex justify-center mt-6 sm:mt-8">
+        <div className={`flex justify-center mt-6 sm:mt-8 transition-all duration-700 delay-300 ${
+          shouldAnimate ? 'opacity-100' : 'opacity-0'
+        }`}>
           <div className="flex flex-col items-center gap-1">
             <span className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
               <span>←</span> Scroll horizontally to explore <span>→</span>

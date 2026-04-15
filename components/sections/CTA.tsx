@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
-// Simple Toast Component (inline to avoid dependency)
+// Simple Toast Component
 function SimpleToast({ message, type, onClose }: { message: string; type: 'success' | 'error' | 'info'; onClose: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000)
@@ -22,6 +22,7 @@ function SimpleToast({ message, type, onClose }: { message: string; type: 'succe
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 50 }}
+      transition={{ type: 'tween', duration: 0.3 }}
       className={`fixed bottom-6 right-6 z-50 ${colors[type]} text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm`}
     >
       <span className="text-lg">
@@ -83,6 +84,16 @@ export default function CTA() {
   const [formType, setFormType] = useState('')
   const [formData, setFormData] = useState({ name: '', email: '', company: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  // Trigger animations only once
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
 
   const handleInquiry = (type: string) => {
     setFormType(type)
@@ -93,7 +104,6 @@ export default function CTA() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     setToastMessage(`${formType} inquiry sent! Our team will contact you within 24 hours.`)
@@ -128,15 +138,11 @@ export default function CTA() {
 
         <div ref={ref as any} className="relative z-10 max-w-5xl mx-auto w-full">
           
-          {/* Main Content */}
-          <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          {/* Main Content - CSS transitions instead of Framer Motion */}
+          <div className={`transition-all duration-700 ${shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             
-            {/* Badge */}
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
+            {/* Badge - Removed framer-motion */}
+            <div>
               <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-6">
                 Start Your Journey
               </span>
@@ -146,7 +152,7 @@ export default function CTA() {
                   Most Powerful Platform
                 </span>
               </h2>
-            </motion.div>
+            </div>
             
             <p className="text-gray-400 text-base sm:text-lg mt-6 max-w-2xl mx-auto px-4">
               Join the brands, partners, and creators who have chosen Dubai Mall as their global stage.
@@ -161,13 +167,11 @@ export default function CTA() {
               ))}
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - Removed framer-motion from buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 px-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => handleInquiry('Leasing')}
-                className="group relative overflow-hidden rounded-full px-6 sm:px-8 py-3 sm:py-4 bg-white text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:shadow-2xl hover:shadow-white/20"
+                className="group relative overflow-hidden rounded-full px-6 sm:px-8 py-3 sm:py-4 bg-white text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Lease Space
@@ -175,42 +179,34 @@ export default function CTA() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
-              </motion.button>
+              </button>
               
               <Link href="/sponsorship">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border border-white/30 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-base hover:bg-white/10 hover:border-white/50 transition-all duration-300 w-full sm:w-auto"
-                >
+                <button className="border border-white/30 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-base hover:bg-white/10 hover:border-white/50 transition-all duration-300 w-full sm:w-auto">
                   Become a Partner
-                </motion.button>
+                </button>
               </Link>
               
               <Link href="/events">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border border-white/30 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-base hover:bg-white/10 hover:border-white/50 transition-all duration-300 w-full sm:w-auto"
-                >
+                <button className="border border-white/30 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-base hover:bg-white/10 hover:border-white/50 transition-all duration-300 w-full sm:w-auto">
                   Book an Event
-                </motion.button>
+                </button>
               </Link>
             </div>
 
-            {/* Trust Signals Grid */}
+            {/* Trust Signals Grid - CSS transitions */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-10 max-w-3xl mx-auto px-4">
               {trustSignals.map((signal, idx) => (
-                <motion.div
+                <div
                   key={signal.text}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.5 + idx * 0.1 }}
-                  className={`glass-card rounded-xl p-2 sm:p-3 text-center hover:scale-105 transition-all duration-300`}
+                  className={`glass-card rounded-xl p-2 sm:p-3 text-center hover:scale-105 transition-all duration-300 ${
+                    shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${500 + idx * 100}ms` }}
                 >
                   <div className="text-green-400 text-lg sm:text-xl">{signal.icon}</div>
                   <div className="text-[10px] sm:text-xs text-gray-300 mt-1">{signal.text}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -224,7 +220,7 @@ export default function CTA() {
         </div>
       </section>
 
-      {/* Modal Form */}
+      {/* Modal Form - Keep framer-motion for modal only */}
       <AnimatePresence>
         {showForm && (
           <>
@@ -232,6 +228,7 @@ export default function CTA() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
               onClick={handleCloseForm}
             />
@@ -239,6 +236,7 @@ export default function CTA() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'tween', duration: 0.3 }}
               className="fixed inset-0 m-auto z-50 w-[90%] max-w-md h-fit"
             >
               <div className="glass rounded-2xl p-6 sm:p-8">

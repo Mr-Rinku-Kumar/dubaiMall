@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
 import { 
   HiOutlineCalendar, 
   HiOutlineUsers, 
@@ -11,11 +10,7 @@ import {
   HiOutlineSparkles,
   HiOutlineArrowRight,
   HiOutlineLocationMarker,
-  HiOutlineCheckCircle,
-  HiOutlineMusicNote,
-  HiOutlineLightBulb,
-  HiOutlineBriefcase,
-  HiOutlineScissors
+  HiOutlineCheckCircle
 } from 'react-icons/hi'
 import { CgGirl } from "react-icons/cg";
 import { HiOutlineRocketLaunch } from "react-icons/hi2";
@@ -53,19 +48,20 @@ function useIntersectionObserver(options = { threshold: 0.2, triggerOnce: true }
   return { ref, isVisible }
 }
 
+// Original icons - KEEP AS IS
 const eventTypes = [
   { name: 'Concerts', icon: CgGirl, desc: 'Global artists. Iconic venues.', color: 'from-purple-500/20 to-pink-500/20', iconColor: 'text-purple-400' },
   { name: 'Brand Activations', icon: HiOutlineSparkles, desc: 'Immersive. Viral. Unforgettable.', color: 'from-blue-500/20 to-cyan-500/20', iconColor: 'text-blue-400' },
   { name: 'Exhibitions', icon: CgGirl, desc: 'Cultural. Curated. Global.', color: 'from-green-500/20 to-emerald-500/20', iconColor: 'text-green-400' },
   { name: 'Product Launches', icon: HiOutlineRocketLaunch, desc: 'Maximum impact. Maximum reach.', color: 'from-orange-500/20 to-red-500/20', iconColor: 'text-orange-400' },
-  { name: 'Corporate Events', icon: HiOutlineBriefcase, desc: 'Conferences. Galas. Networking.', color: 'from-indigo-500/20 to-purple-500/20', iconColor: 'text-indigo-400' },
+  { name: 'Corporate Events', icon: HiOutlineOfficeBuilding, desc: 'Conferences. Galas. Networking.', color: 'from-indigo-500/20 to-purple-500/20', iconColor: 'text-indigo-400' },
   { name: 'Fashion Shows', icon: GiClothes, desc: 'Runway. Luxury. Press coverage.', color: 'from-pink-500/20 to-rose-500/20', iconColor: 'text-pink-400' },
 ]
 
 const venueHighlights = [
-  { name: 'Fashion Catwalk', capacity: '500+', features: 'LED walls, Professional lighting', image: 'https://images.unsplash.com/photo-1536834478751-1a2e9e9b1f2b?w=400&q=80', icon: GiSpeaker },
-  { name: 'Central Atrium', capacity: '1,000+', features: 'High footfall, Multi-level', image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&q=80', icon: HiOutlineLocationMarker },
-  { name: 'Waterfront Stage', capacity: '2,000+', features: 'Fountain views, Outdoor', image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80', icon: HiOutlineSparkles },
+  { name: 'Fashion Catwalk', capacity: '500+', features: 'LED walls, Professional lighting', image: '/images/fashioncatwalk.webp', icon: GiSpeaker },
+  { name: 'Central Atrium', capacity: '1,000+', features: 'High footfall, Multi-level', image: '/images/central.jpg', icon: HiOutlineLocationMarker },
+  { name: 'Waterfront Stage', capacity: '2,000+', features: 'Fountain views, Outdoor', image: '/images/waterfront.jpg', icon: HiOutlineSparkles },
 ]
 
 const eventStats = [
@@ -86,15 +82,35 @@ const pastBrands = ['Chanel', 'Apple', 'Nike', 'Dior', 'Samsung', 'Rolex', 'Merc
 export default function Events() {
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2, triggerOnce: true })
   const [videoError, setVideoError] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  // Lazy load video - only when section is visible
+  useEffect(() => {
+    if (isVisible && !shouldPlayVideo) {
+      setShouldPlayVideo(true)
+    }
+  }, [isVisible, shouldPlayVideo])
+
+  // Trigger animations only once
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true)
+    }
+  }, [isVisible, hasAnimated])
+
+  const shouldAnimate = hasAnimated || isVisible
 
   return (
     <section id="events" className="min-h-screen py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-zinc-950 to-black snap-section">
       <div className="max-w-7xl mx-auto">
 
         <div ref={ref as any}>
-          {/* Header */}
-          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Header - CSS transitions only (removed framer-motion) */}
+          <div className={`text-center mb-10 sm:mb-12 md:mb-16 transition-all duration-700 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <span className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-gray-400 bg-white/5 px-4 py-1.5 rounded-full mb-4">
               Event Capabilities
             </span>
@@ -110,16 +126,17 @@ export default function Events() {
             </p>
           </div>
 
-          {/* Event Stats Row with React Icons */}
-          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Event Stats Row - CSS transitions */}
+          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-100 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             {eventStats.map((stat, idx) => {
               const Icon = stat.icon
               return (
                 <div
                   key={stat.label}
                   className="glass-card rounded-xl p-3 sm:p-4 text-center hover:scale-105 transition-all duration-300"
-                  style={{ transitionDelay: `${100 + idx * 50}ms` }}
+                  style={{ transitionDelay: `${idx * 50}ms` }}
                 >
                   <Icon className={`w-6 h-6 sm:w-7 sm:h-7 mx-auto mb-2 ${stat.color}`} />
                   <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400">
@@ -131,21 +148,31 @@ export default function Events() {
             })}
           </div>
 
-          {/* Video Section */}
-          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-10 sm:mb-12 aspect-video transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            }`}>
-            {!videoError ? (
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                onError={() => setVideoError(true)}
-                className="w-full h-full object-cover"
-                poster="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80"
-              >
-                <source src="/videos/dubai5.mp4" type="video/mp4" />
-              </video>
+          {/* Video Section - Lazy loaded */}
+          <div className={`relative rounded-xl sm:rounded-2xl overflow-hidden mb-10 sm:mb-12 aspect-video transition-all duration-700 delay-200 ${
+            shouldAnimate ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
+            {shouldPlayVideo && !videoError ? (
+              <>
+                {!videoLoaded && (
+                  <div className="absolute inset-0 shimmer bg-gray-800 z-10" />
+                )}
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  onLoadedData={() => setVideoLoaded(true)}
+                  onError={() => setVideoError(true)}
+                  className={`w-full h-full object-cover transition-opacity duration-700 ${
+                    videoLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  poster="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80"
+                >
+                  <source src="/videos/event2.mp4" type="video/mp4" />
+                </video>
+              </>
             ) : (
               <img
                 src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80"
@@ -162,16 +189,17 @@ export default function Events() {
             </div>
           </div>
 
-          {/* Event Types Grid - 6 items with React Icons */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Event Types Grid - CSS transitions */}
+          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-10 sm:mb-12 transition-all duration-700 delay-300 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             {eventTypes.map((type, i) => {
               const Icon = type.icon
               return (
                 <div
                   key={type.name}
                   className={`bg-gradient-to-br ${type.color} rounded-xl p-3 sm:p-4 text-center hover:scale-105 transition-all duration-300 cursor-pointer group`}
-                  style={{ transitionDelay: `${300 + i * 50}ms` }}
+                  style={{ transitionDelay: `${i * 50}ms` }}
                 >
                   <Icon className={`text-2xl sm:text-3xl mb-2 mx-auto group-hover:scale-110 transition-transform ${type.iconColor}`} />
                   <h3 className="text-xs sm:text-sm font-semibold text-white">
@@ -185,9 +213,10 @@ export default function Events() {
             })}
           </div>
 
-          {/* Venue Highlights with Icons */}
-          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          {/* Venue Highlights - CSS transitions */}
+          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-400 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                 <HiOutlineLocationMarker className="text-yellow-400 w-4 h-4" />
@@ -206,7 +235,7 @@ export default function Events() {
                   <div
                     key={venue.name}
                     className="glass-card rounded-xl overflow-hidden hover:scale-102 transition-all duration-300"
-                    style={{ transitionDelay: `${400 + idx * 100}ms` }}
+                    style={{ transitionDelay: `${idx * 100}ms` }}
                   >
                     <div className="aspect-video overflow-hidden relative">
                       <img
@@ -231,8 +260,9 @@ export default function Events() {
           </div>
 
           {/* Past Events Highlights */}
-          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          <div className={`mb-10 sm:mb-12 transition-all duration-700 delay-500 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <div className="text-center mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-semibold flex items-center justify-center gap-2">
                 <HiOutlineStar className="text-yellow-400 w-4 h-4" />
@@ -245,7 +275,7 @@ export default function Events() {
                 <span
                   key={brand}
                   className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/5 text-gray-300 text-xs sm:text-sm hover:bg-white/10 hover:text-white transition-all duration-300 cursor-default"
-                  style={{ transitionDelay: `${500 + idx * 30}ms` }}
+                  style={{ transitionDelay: `${idx * 30}ms` }}
                 >
                   {brand}
                 </span>
@@ -253,8 +283,10 @@ export default function Events() {
             </div>
           </div>
 
-          {/* Venue Modules with React Icons */}
-          <div className="mt-12">
+          {/* Venue Modules */}
+          <div className={`mt-12 transition-all duration-700 delay-600 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <h3 className="text-xl font-semibold text-center mb-6 flex items-center justify-center gap-2">
               <HiOutlineOfficeBuilding className="text-yellow-400 w-5 h-5" />
               Our Venues
@@ -275,8 +307,9 @@ export default function Events() {
           </div>
 
           {/* CTA Section */}
-          <div className={`text-center mt-12 sm:mt-16 transition-all duration-700 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+          <div className={`text-center mt-12 sm:mt-16 transition-all duration-700 delay-700 ${
+            shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
             <Link href="/events">
               <button className="group relative overflow-hidden rounded-full px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/20">
                 <span className="relative z-10 flex items-center gap-2">
