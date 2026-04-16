@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   HiOutlineMenu, 
   HiOutlineX, 
@@ -18,13 +18,13 @@ import {
 } from 'react-icons/hi'
 
 const navItems = [
-  { label: 'Overview', href: '#why', type: 'hash', icon: HiOutlineHome },
-  { label: 'Retail', href: '#retail', type: 'hash', icon: HiOutlineShoppingBag },
-  { label: 'Luxury', href: '#luxury', type: 'hash', icon: HiOutlineSparkles },
-  { label: 'Dining', href: '#dining', type: 'hash', icon: HiOutlineOfficeBuilding },
-  { label: 'Entertainment', href: '#entertainment', type: 'hash', icon: HiOutlineTicket },
-  { label: 'Events', href: '#events', type: 'hash', icon: HiOutlineCalendar },
-  { label: 'Leasing', href: '/leasing', type: 'path', icon: HiOutlineUserGroup },
+  { label: 'Overview', href: '/#why', type: 'hash', icon: HiOutlineHome, sectionId: 'why' },
+  { label: 'Retail', href: '/#retail', type: 'hash', icon: HiOutlineShoppingBag, sectionId: 'retail' },
+  { label: 'Luxury', href: '/#luxury', type: 'hash', icon: HiOutlineSparkles, sectionId: 'luxury' },
+  { label: 'Dining', href: '/#dining', type: 'hash', icon: HiOutlineOfficeBuilding, sectionId: 'dining' },
+  { label: 'Entertainment', href: '/#entertainment', type: 'hash', icon: HiOutlineTicket, sectionId: 'entertainment' },
+  { label: 'Events', href: '/#events', type: 'hash', icon: HiOutlineCalendar, sectionId: 'events' },
+  { label: 'Leasing', href: '/leasing', type: 'path', icon: HiOutlineUserGroup, sectionId: null },
 ]
 
 export default function Navbar() {
@@ -33,7 +33,38 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const scrollTimeout = useRef<NodeJS.Timeout>()
+
+  // Function to update active section based on scroll position
+  const updateActiveSection = useCallback(() => {
+    if (pathname !== '/') {
+      setActive('')
+      return
+    }
+
+    const sections = navItems
+      .filter(item => item.type === 'hash' && item.sectionId)
+      .map(item => item.sectionId)
+    
+    const scrollPosition = window.scrollY + 150
+    
+    let currentSection = ''
+    for (let i = sections.length - 1; i >= 0; i--) {
+      const sectionId = sections[i]
+      const element = document.getElementById(sectionId)
+      if (element && scrollPosition >= element.offsetTop) {
+        currentSection = sectionId
+        break
+      }
+    }
+    
+    if (window.scrollY < 100) {
+      currentSection = sections[0] || ''
+    }
+    
+    setActive(currentSection)
+  }, [pathname])
 
   // Throttled scroll handler
   const handleScroll = useCallback(() => {
@@ -41,33 +72,29 @@ export default function Navbar() {
     
     scrollTimeout.current = setTimeout(() => {
       setScrolled(window.scrollY > 50)
-      
-      if (pathname === '/') {
-        const sections = navItems.filter(item => item.type === 'hash').map(item => item.href.slice(1))
-        const offset = 120
-        
-        for (const section of sections.reverse()) {
-          const element = document.getElementById(section)
-          if (element && window.scrollY + offset >= element.offsetTop) {
-            setActive(section)
-            break
-          }
-        }
-      }
+      updateActiveSection()
       scrollTimeout.current = undefined
     }, 50)
-  }, [pathname])
+  }, [updateActiveSection])
 
   useEffect(() => {
     setMounted(true)
+    
+    setTimeout(() => {
+      updateActiveSection()
+    }, 100)
+    
     window.addEventListener('scroll', handleScroll)
+    window.addEventListener('resize', updateActiveSection)
+    
     return () => {
       window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', updateActiveSection)
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current)
     }
-  }, [handleScroll])
+  }, [handleScroll, updateActiveSection])
 
-  // Body overflow fix - prevent background scroll when menu open
+  // Body overflow fix
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden'
@@ -85,19 +112,51 @@ export default function Navbar() {
     }
   }, [mobileMenuOpen])
 
-  const handleClick = (item: typeof navItems[0]) => {
+  // Handle hash link click - FIXED for mobile
+  const handleHashClick = async (item: typeof navItems[0]) => {
     if (item.type === 'path') return
     
-    const element = document.querySelector(item.href)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-      setMobileMenuOpen(false)
+    const targetPath = '/'
+    const hash = `#${item.sectionId}`
+    
+    // Close mobile menu first
+    setMobileMenuOpen(false)
+    
+    // If already on home page
+    if (pathname === '/') {
+      // Small delay to ensure menu closes before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(item.sectionId!)
+        if (element) {
+          const offset = 80
+          const elementPosition = element.offsetTop - offset
+          
+          window.scrollTo({
+            top: elementPosition,
+            behavior: 'smooth'
+          })
+          
+          window.history.pushState(null, '', hash)
+          setActive(item.sectionId!)
+        }
+      }, 150)
+    } else {
+      // If on another page, navigate to home page with hash
+      router.push(targetPath + hash)
+      // Small delay to ensure navigation happens
+      setTimeout(() => {
+        setActive(item.sectionId!)
+      }, 300)
     }
   }
 
   const isActivePath = (href: string) => {
     if (href === '/') return pathname === '/'
     return pathname === href
+  }
+
+  const isActiveHash = (sectionId: string) => {
+    return active === sectionId && pathname === '/'
   }
 
   if (!mounted) return null
@@ -115,7 +174,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between min-h-[56px] sm:min-h-[64px] lg:min-h-[80px]">
             
             {/* Logo */}
-            <Link href="/" className="cursor-pointer z-20">
+            <Link href="/" className="cursor-pointer z-20" onClick={() => setMobileMenuOpen(false)}>
               <span className="text-base sm:text-xl lg:text-2xl font-bold tracking-tight bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">
                 DUBAI MALL
               </span>
@@ -128,36 +187,40 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-3 lg:gap-4 xl:gap-6">
               {navItems.map((item) => {
                 const Icon = item.icon
+                const isActive = item.type === 'path' 
+                  ? isActivePath(item.href) 
+                  : isActiveHash(item.sectionId!)
+                
                 return item.type === 'path' ? (
                   <Link
                     key={item.label}
                     href={item.href}
                     className={`relative flex items-center gap-1.5 text-sm lg:text-base font-medium transition-colors duration-200 ${
-                      isActivePath(item.href) 
+                      isActive 
                         ? 'text-white' 
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                     <span>{item.label}</span>
-                    {isActivePath(item.href) && (
-                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600" />
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full" />
                     )}
                   </Link>
                 ) : (
                   <button
                     key={item.label}
-                    onClick={() => handleClick(item)}
+                    onClick={() => handleHashClick(item)}
                     className={`relative flex items-center gap-1.5 text-sm lg:text-base font-medium transition-colors duration-200 ${
-                      active === item.href.slice(1) 
+                      isActive 
                         ? 'text-white' 
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                     <span>{item.label}</span>
-                    {active === item.href.slice(1) && (
-                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600" />
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full" />
                     )}
                   </button>
                 )
@@ -188,11 +251,10 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay - Fixed width for all devices */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -202,7 +264,6 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             />
             
-            {/* Menu Panel - Responsive width */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -220,34 +281,42 @@ export default function Navbar() {
                 <div className="flex-1 overflow-y-auto py-4 px-4">
                   {navItems.map((item) => {
                     const Icon = item.icon
+                    const isActive = item.type === 'path' 
+                      ? isActivePath(item.href) 
+                      : isActiveHash(item.sectionId!)
+                    
                     return item.type === 'path' ? (
                       <Link
                         key={item.label}
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                          isActivePath(item.href)
+                          isActive
                             ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-white border border-yellow-500/30'
                             : 'text-gray-400 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isActivePath(item.href) ? 'text-yellow-400' : 'text-gray-500'}`} />
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-400' : 'text-gray-500'}`} />
                         <span>{item.label}</span>
                       </Link>
                     ) : (
                       <button
                         key={item.label}
                         onClick={() => {
-                          handleClick(item)
+                          // Close menu and handle navigation
                           setMobileMenuOpen(false)
+                          // Use setTimeout to ensure menu closes before navigation
+                          setTimeout(() => {
+                            handleHashClick(item)
+                          }, 50)
                         }}
                         className={`flex items-center gap-3 w-full text-left px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                          active === item.href.slice(1)
+                          isActive
                             ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-white border border-yellow-500/30'
                             : 'text-gray-400 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${active === item.href.slice(1) ? 'text-yellow-400' : 'text-gray-500'}`} />
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-400' : 'text-gray-500'}`} />
                         <span>{item.label}</span>
                       </button>
                     )

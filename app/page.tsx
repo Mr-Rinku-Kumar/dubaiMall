@@ -9,6 +9,7 @@ import Entertainment from '@/components/sections/Entertainment'
 import Events from '@/components/sections/Events'
 import Testimonials from '@/components/sections/Testimonials'
 import CTA from '@/components/sections/CTA'
+import Footer from '@/components/sections/Footer'
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       <Events />
       <Testimonials />
       <CTA />
+      <Footer />
     </>
   )
 }
